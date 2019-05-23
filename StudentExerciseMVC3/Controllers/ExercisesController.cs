@@ -158,9 +158,24 @@ namespace StudentExerciseMVC3.Controllers
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE Exercise
+                                                SET Title = @title,
+                                                    Lang = @lang
+                                                WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@title", Convert.ToString(collection["Title"])));
+                        cmd.Parameters.Add(new SqlParameter("@lang", Convert.ToString(collection["Lang"])));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.ExecuteNonQuery();
+                        return RedirectToAction(nameof(Index));
 
-                return RedirectToAction(nameof(Index));
+                    }
+                }
+
             }
             catch
             {

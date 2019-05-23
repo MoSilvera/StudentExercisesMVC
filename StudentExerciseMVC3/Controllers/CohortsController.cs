@@ -144,7 +144,37 @@ namespace StudentExerciseMVC3.Controllers
         // GET: Students/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                        $@"
+                        SELECT
+                        c.Id,
+                        c.Designation
+                        FROM Cohort c
+                        Where c.id = @id;";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    Cohort cohort = null;
+
+                    if (reader.Read())
+                    {
+                        cohort = new Cohort
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Designation = reader.GetString(reader.GetOrdinal("Designation"))
+
+                        };
+
+                    }
+                    reader.Close();
+                    return View(cohort);
+
+                }
+            }
         }
 
         // POST: Students/Edit/5
@@ -159,12 +189,10 @@ namespace StudentExerciseMVC3.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"UPDATE Exercise
-                                                SET Title = @title,
-                                                    Lang = @lang
+                        cmd.CommandText = @"UPDATE Cohort
+                                                SET Designation = @designation
                                                 WHERE Id = @id";
-                        cmd.Parameters.Add(new SqlParameter("@title", Convert.ToString(collection["Title"])));
-                        cmd.Parameters.Add(new SqlParameter("@lang", Convert.ToString(collection["Lang"])));
+                        cmd.Parameters.Add(new SqlParameter("@designation", Convert.ToString(collection["Designation"])));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
                         cmd.ExecuteNonQuery();
                         return RedirectToAction(nameof(Index));

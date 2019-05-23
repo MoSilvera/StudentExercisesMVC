@@ -41,7 +41,7 @@ namespace StudentExerciseMVC3.Controllers
                         e.Id,
                         e.Title,
                         e.Lang
-                        FROM Exercise e
+                        FROM Exercise e;
                         ";
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -75,13 +75,13 @@ namespace StudentExerciseMVC3.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText =
-                        @"
-                        SELECT e.Id,
+                        $@"
+                        SELECT
                         e.Id,
                         e.Title,
                         e.Lang
                         FROM Exercise e
-                        Where e.id = @id";
+                        Where e.id = @id;";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
                     Exercise exercise = null;
@@ -187,7 +187,39 @@ namespace StudentExerciseMVC3.Controllers
         // GET: Students/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText =
+                        $@"
+                        SELECT
+                        e.Id,
+                        e.Title,
+                        e.Lang
+                        FROM Exercise e
+                        Where e.id = @id;";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    Exercise exercise = null;
+
+                    if (reader.Read())
+                    {
+                        exercise = new Exercise
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Lang = reader.GetString(reader.GetOrdinal("Lang"))
+
+                        };
+
+                    }
+                    reader.Close();
+                    return View(exercise);
+
+                }
+            }
         }
 
         // POST: Students/Delete/5
@@ -197,9 +229,27 @@ namespace StudentExerciseMVC3.Controllers
         {
             try
             {
-                // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
 
-                return RedirectToAction(nameof(Index));
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM StudentExercises
+                                            Where ExerciseId = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.ExecuteNonQuery();
+                    }
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM Exercise WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        cmd.ExecuteNonQuery();
+                        return RedirectToAction(nameof(Index));
+
+                    }
+                }
             }
             catch
             {

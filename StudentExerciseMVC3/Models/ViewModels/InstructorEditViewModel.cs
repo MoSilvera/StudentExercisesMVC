@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace StudentExerciseMVC3.Models.ViewModels
 {
-    public class StudentEditViewModel
+    public class InstructorEditViewModel
     {
-        public Student Student { get; set; } = new Student();
+        public Instructor instructor { get; set; } = new Instructor();
 
         public List<SelectListItem> Cohorts { get; set; } = new List<SelectListItem>();
 
         public SqlConnection Connection;
 
-        public StudentEditViewModel()
+        public InstructorEditViewModel()
         {
 
         }
-        public StudentEditViewModel(SqlConnection connection, int id)
+        public InstructorEditViewModel(SqlConnection connection, int id)
         {
             Connection = connection;
             GetAllCohorts(id);
@@ -66,40 +66,42 @@ namespace StudentExerciseMVC3.Models.ViewModels
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText =
-                        $@"SELECT s.Id, 
-                        s.FirstName, 
-                        s.LastName, 
-                        s.SlackHandle, 
-                        s.CohortId, 
+                        $@"SELECT i.Id, 
+                        i.FirstName, 
+                        i.LastName, 
+                        i.SlackHandle, 
+                        i.CohortId,
+                        i.Specialty,
                         c.Designation 
-                        FROM Student s Join Cohort c 
-                        ON s.CohortId = c.Id
-                        Where s.id = @id";
+                        FROM Instructor i Join Cohort c 
+                        ON i.CohortId = c.Id
+                        Where i.id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
-                   
+
 
                     while (reader.Read())
                     {
 
 
-                        Student.Id = reader.GetInt32(reader.GetOrdinal("Id"));
-                        Student.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
-                        Student.LastName = reader.GetString(reader.GetOrdinal("LastName"));
-                        Student.SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle"));
-                        Student.CohortId = reader.GetInt32(reader.GetOrdinal("CohortId"));
-                            Student.Cohort = new Cohort
-                            {
-                                Designation = reader.GetString(reader.GetOrdinal("Designation")),
-                                Id = reader.GetInt32(reader.GetOrdinal("CohortId"))
-                            }
+                        instructor.Id = reader.GetInt32(reader.GetOrdinal("Id"));
+                        instructor.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                        instructor.LastName = reader.GetString(reader.GetOrdinal("LastName"));
+                        instructor.SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle"));
+                        instructor.CohortId = reader.GetInt32(reader.GetOrdinal("CohortId"));
+                        instructor.Specialty = reader.GetString(reader.GetOrdinal("Specialty"));
+                        instructor.Cohort = new Cohort
+                        {
+                            Designation = reader.GetString(reader.GetOrdinal("Designation")),
+                            Id = reader.GetInt32(reader.GetOrdinal("CohortId"))
+                        }
 
 
-                        ;
+                    ;
 
                     }
                     reader.Close();
-                    
+
                 }
             }
         }

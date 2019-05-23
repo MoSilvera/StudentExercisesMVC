@@ -37,13 +37,13 @@ namespace StudentExerciseMVC3.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-            SELECT s.Id,
-                s.FirstName,
-                s.LastName,
-                s.SlackHandle,
-                s.CohortId
-            FROM Student s
-        ";
+                        SELECT s.Id,
+                            s.FirstName,
+                            s.LastName,
+                            s.SlackHandle,
+                            s.CohortId
+                        FROM Student s
+                    ";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<Student> students = new List<Student>();
@@ -109,7 +109,7 @@ namespace StudentExerciseMVC3.Controllers
 
                 }
             }
-            
+
         }
 
         // GET: Students/Create
@@ -141,11 +141,12 @@ namespace StudentExerciseMVC3.Controllers
 
                         int newId = (int)cmd.ExecuteScalar();
                         model.Student.Id = newId;
+                        cmd.ExecuteNonQuery();
                         return RedirectToAction(nameof(Index));
                     }
                 }
 
-                
+
             }
             catch
             {
@@ -156,22 +157,43 @@ namespace StudentExerciseMVC3.Controllers
         // GET: Students/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            StudentEditViewModel model = new StudentEditViewModel(Connection);
+            return View(model);
         }
 
         // POST: Students/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, IFormCollection collection, [FromForm] StudentEditViewModel model)
         {
             try
             {
-                // TODO: Add update logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE Student
+                                                SET FirstName = @firstName,
+                                                    LastName = @lastName,
+                                                    SlackHandle = @slackHandle,
+                                                    CohortId = @cohortId
+                                                WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@firstName", Convert.ToString(collection["Student.FirstName"])));
+                        cmd.Parameters.Add(new SqlParameter("@lastName", Convert.ToString(collection["Student.LastName"])));
+                        cmd.Parameters.Add(new SqlParameter("@slackHandle", Convert.ToString(collection["Student.SlackHandle"])));
+                        cmd.Parameters.Add(new SqlParameter("@cohortId", (Convert.ToInt32(collection["Student.CohortId"]))));
 
-                return RedirectToAction(nameof(Index));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.ExecuteNonQuery();
+                        return RedirectToAction(nameof(Index));
+
+                    }
+                }
             }
-            catch
+            catch(Exception e)
             {
+                Console.WriteLine(e);
                 return View();
             }
         }

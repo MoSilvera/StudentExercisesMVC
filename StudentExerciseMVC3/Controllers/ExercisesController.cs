@@ -177,8 +177,9 @@ namespace StudentExerciseMVC3.Controllers
                 }
 
             }
-            catch
+            catch(Exception e)
             {
+                Console.WriteLine(e);
                 return View();
             }
         }

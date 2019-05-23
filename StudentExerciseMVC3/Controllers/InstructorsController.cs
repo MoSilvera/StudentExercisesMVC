@@ -228,22 +228,23 @@ namespace StudentExerciseMVC3.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText =
-                        $@"SELECT s.Id, s.FirstName, s.LastName, s.SlackHandle, s.CohortId, c.Designation 
-                        FROM Student s Join Cohort c 
-                        ON s.CohortId = c.Id
-                        Where s.id = @id";
+                        $@"SELECT i.Id, i.FirstName, i.LastName, i.SlackHandle, i.CohortId, i.Specialty, c.Designation 
+                        FROM Instructor i Join Cohort c 
+                        ON i.CohortId = c.Id
+                        Where i.id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
-                    Student student = null;
+                    Instructor instructor = null;
 
                     if (reader.Read())
                     {
-                        student = new Student
+                        instructor = new Instructor
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
+                            Specialty = reader.GetString(reader.GetOrdinal("Specialty")),
                             CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
                             Cohort = new Cohort
                             {
@@ -256,7 +257,7 @@ namespace StudentExerciseMVC3.Controllers
 
                     }
                     reader.Close();
-                    return View(student);
+                    return View(instructor);
 
                 }
             }
@@ -273,16 +274,10 @@ namespace StudentExerciseMVC3.Controllers
                 {   
 
                     conn.Open();
+                   
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"DELETE FROM StudentExercises
-                                            Where StudentId = @id";
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-                        cmd.ExecuteNonQuery();
-                    }
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        cmd.CommandText = @"DELETE FROM Student WHERE Id = @id";
+                        cmd.CommandText = @"DELETE FROM Instructor WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         cmd.ExecuteNonQuery();

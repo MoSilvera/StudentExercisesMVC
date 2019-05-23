@@ -219,28 +219,26 @@ namespace StudentExerciseMVC3.Controllers
                     cmd.CommandText =
                         $@"
                         SELECT
-                        e.Id,
-                        e.Title,
-                        e.Lang
-                        FROM Exercise e
-                        Where e.id = @id;";
+                        c.Id,
+                        c.Designation
+                        FROM Cohort c
+                        Where c.id = @id;";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
-                    Exercise exercise = null;
+                    Cohort cohort = null;
 
                     if (reader.Read())
                     {
-                        exercise = new Exercise
+                        cohort = new Cohort
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Title = reader.GetString(reader.GetOrdinal("Title")),
-                            Lang = reader.GetString(reader.GetOrdinal("Lang"))
+                            Designation = reader.GetString(reader.GetOrdinal("Designation"))
 
                         };
 
                     }
                     reader.Close();
-                    return View(exercise);
+                    return View(cohort);
 
                 }
             }
@@ -257,16 +255,10 @@ namespace StudentExerciseMVC3.Controllers
                 {
 
                     conn.Open();
+                   
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"DELETE FROM StudentExercises
-                                            Where ExerciseId = @id";
-                        cmd.Parameters.Add(new SqlParameter("@id", id));
-                        cmd.ExecuteNonQuery();
-                    }
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        cmd.CommandText = @"DELETE FROM Exercise WHERE Id = @id";
+                        cmd.CommandText = @"DELETE FROM Cohort WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
                         cmd.ExecuteNonQuery();

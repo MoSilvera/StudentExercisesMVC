@@ -111,7 +111,7 @@ namespace StudentExerciseMVC3.Controllers
         // POST: Students/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([FromForm] Exercise exercise)
+        public ActionResult Create([FromForm] Cohort cohort)
         {
             try
             {
@@ -120,15 +120,15 @@ namespace StudentExerciseMVC3.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"INSERT INTO Exercise (Title, Lang)
+                        cmd.CommandText = @"INSERT INTO Cohort (Designation)
                                             OUTPUT INSERTED.Id
-                                            VALUES (@Title, @Lang)";
-                        cmd.Parameters.Add(new SqlParameter("@Title", exercise.Title));
-                        cmd.Parameters.Add(new SqlParameter("@Lang", exercise.Lang));
+                                            VALUES (@Designation)";
+                        cmd.Parameters.Add(new SqlParameter("@Designation", cohort.Designation));
+                        
                         
 
                         int newId = (int)cmd.ExecuteScalar();
-                        exercise.Id = newId;
+                        cohort.Id = newId;
                         return RedirectToAction(nameof(Index));
                     }
                 }

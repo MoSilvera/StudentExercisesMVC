@@ -50,6 +50,7 @@ namespace StudentExerciseMVC3
                 app.UseHsts();
             }
             StudentRepository.SetConfig(Configuration);
+            CohortRepository.SetConfig(Configuration);
             
             app.UseHttpsRedirection();
             app.UseStaticFiles();

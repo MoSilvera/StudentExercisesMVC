@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using StudentExerciseMVC3.Repositories;
 using StudentExercisesAPI.Models;
 using System;
 using System.Collections.Generic;
@@ -14,42 +15,17 @@ namespace StudentExerciseMVC3.Models.ViewModels
 
         public List<SelectListItem> Cohorts { get; set; } = new List<SelectListItem>();
 
-        public SqlConnection Connection;
+        public StudentEditViewModel() { }
 
-        public StudentEditViewModel()
+        public StudentEditViewModel(int id)
         {
-
-        }
-        public StudentEditViewModel(SqlConnection connection, int id)
-        {
-            Connection = connection;
+            Student = StudentRepository.GetStudent(id);
             GetAllCohorts(id);
         }
 
         public void GetAllCohorts(int id)
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"Select c.Id, c.Designation from Cohort c;";
-
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    List<Cohort> cohorts = new List<Cohort>();
-                    while (reader.Read())
-                    {
-                        Cohort cohort = new Cohort
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Designation = reader.GetString(reader.GetOrdinal("Designation"))
-                        };
-
-                        cohorts.Add(cohort);
-                    }
-
-                    Cohorts = cohorts.Select(li => new SelectListItem
+                    Cohorts = CohortRepository.GetCohorts().Select(li => new SelectListItem
                         {
                             Text = li.Designation,
                             Value = li.Id.ToString()
@@ -61,47 +37,10 @@ namespace StudentExerciseMVC3.Models.ViewModels
                         Text = "Choose cohort ...",
                         Value = "0"
                     });
-                    reader.Close();
-                }
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText =
-                        $@"SELECT s.Id, 
-                        s.FirstName, 
-                        s.LastName, 
-                        s.SlackHandle, 
-                        s.CohortId, 
-                        c.Designation 
-                        FROM Student s Join Cohort c 
-                        ON s.CohortId = c.Id
-                        Where s.id = @id";
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
-                    SqlDataReader reader = cmd.ExecuteReader();
-                   
 
-                    while (reader.Read())
-                    {
-
-
-                        Student.Id = reader.GetInt32(reader.GetOrdinal("Id"));
-                        Student.FirstName = reader.GetString(reader.GetOrdinal("FirstName"));
-                        Student.LastName = reader.GetString(reader.GetOrdinal("LastName"));
-                        Student.SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle"));
-                        Student.CohortId = reader.GetInt32(reader.GetOrdinal("CohortId"));
-                            Student.Cohort = new Cohort
-                            {
-                                Designation = reader.GetString(reader.GetOrdinal("Designation")),
-                                Id = reader.GetInt32(reader.GetOrdinal("CohortId"))
-                            }
-
-
-                        ;
-
-                    }
-                    reader.Close();
-                    
-                }
-            }
+                    StudentRepository.GetStudent(id);
+               
+            
         }
     }
 }

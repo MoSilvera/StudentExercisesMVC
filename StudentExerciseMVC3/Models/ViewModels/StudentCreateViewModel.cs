@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using StudentExercisesAPI.Models;
+using StudentExerciseMVC3.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -16,54 +17,33 @@ namespace StudentExerciseMVC3.Models.ViewModels
 
         public SqlConnection Connection;
 
+       
         public StudentCreateViewModel()
         {
-
-        }
-        public StudentCreateViewModel(SqlConnection connection)
-        {
-            Connection = connection;
+           
             GetAllCohorts();
         }
 
         public void GetAllCohorts()
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"Select c.Id, c.Designation from Cohort c;";
+           
 
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    List<Cohort> cohorts = new List<Cohort>();
-                    while (reader.Read())
+                    Cohorts = CohortRepository.GetCohorts().Select(li => new SelectListItem
                     {
-                        Cohort cohort = new Cohort
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Designation = reader.GetString(reader.GetOrdinal("Designation"))
-                        };
+                        Text = li.Designation,
+                        Value = li.Id.ToString()
 
-                        cohorts.Add(cohort);
-                    }
+                    }).ToList();
 
-                    Cohorts = cohorts.Select(li => new SelectListItem
-                        {
-                            Text = li.Designation,
-                            Value = li.Id.ToString()
 
-                        }).ToList();
-                    
                     Cohorts.Insert(0, new SelectListItem
                     {
                         Text = "Choose cohort ...",
                         Value = "0"
                     });
-                    reader.Close();
-                }
-            }
+                    
+                
+            
         }
     }
 }

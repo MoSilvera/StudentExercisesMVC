@@ -14,20 +14,7 @@ namespace StudentExerciseMVC3.Controllers
 {
     public class StudentsController : Controller
     {
-        private readonly IConfiguration _config;
-
-        public StudentsController(IConfiguration config)
-        {
-            _config = config;
-        }
-
-        public SqlConnection Connection
-        {
-            get
-            {
-                return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            }
-        }
+       
 
         // GET: Students
         public ActionResult Index()
@@ -50,7 +37,7 @@ namespace StudentExerciseMVC3.Controllers
         // GET: Students/Create
         public ActionResult Create()
         {
-            StudentCreateViewModel model = new StudentCreateViewModel(Connection);
+            StudentCreateViewModel model = new StudentCreateViewModel();
             return View(model);
         }
 
@@ -75,7 +62,7 @@ namespace StudentExerciseMVC3.Controllers
         // GET: Students/Edit/5
         public ActionResult Edit(int id)
         {
-            StudentEditViewModel model = new StudentEditViewModel(Connection, id);
+            StudentEditViewModel model = new StudentEditViewModel(id);
             return View(model);
         }
 
@@ -86,7 +73,7 @@ namespace StudentExerciseMVC3.Controllers
         {
             try
             {
-               
+                model.Student.Id = id; 
                 StudentRepository.UpdateStudent(id, collection);
                 return RedirectToAction(nameof(Index));
                 

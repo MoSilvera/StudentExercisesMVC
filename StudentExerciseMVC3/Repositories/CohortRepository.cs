@@ -27,7 +27,7 @@ namespace StudentExerciseMVC3.Repositories
                 return new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             }
         }
-        public static Student GetStudent(int id)
+        public static Cohort GetCohort(int id)
         {
             using (SqlConnection conn = Connection)
             {
@@ -35,40 +35,29 @@ namespace StudentExerciseMVC3.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText =
-                        $@"SELECT s.Id, 
-                        s.FirstName, 
-                        s.LastName, 
-                        s.SlackHandle, 
-                        s.CohortId, 
-                        c.Designation 
-                        FROM Student s Join Cohort c 
-                        ON s.CohortId = c.Id
-                        Where s.id = @id";
+                        $@"
+                        SELECT
+                        c.Id,
+                        c.Designation
+                        FROM Cohort c
+                        Where c.id = @id;";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
-                    Student student = null;
+                    Cohort cohort = null;
 
                     if (reader.Read())
                     {
-                        student = new Student
+                        cohort = new Cohort
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
-                            CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
-                            Cohort = new Cohort
-                            {
-                                Designation = reader.GetString(reader.GetOrdinal("Designation")),
-                                Id = reader.GetInt32(reader.GetOrdinal("CohortId"))
-                            }
-
+                            Designation = reader.GetString(reader.GetOrdinal("Designation"))
 
                         };
 
                     }
                     reader.Close();
-                    return student;
+                    return cohort;
+
                 }
             }
         }

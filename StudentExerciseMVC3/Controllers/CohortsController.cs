@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using StudentExerciseMVC3.Models.ViewModels;
+using StudentExerciseMVC3.Repositories;
 using StudentExercisesAPI.Models;
 
 namespace StudentExerciseMVC3.Controllers
@@ -31,73 +32,15 @@ namespace StudentExerciseMVC3.Controllers
         // GET: Students
         public ActionResult Index()
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = @"
-                        SELECT c.Id,
-                        c.Designation
-                        FROM Cohort c;
-                        ";
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    List<Cohort> cohorts = new List<Cohort>();
-                    while (reader.Read())
-                    {
-                        Cohort cohort = new Cohort
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Designation = reader.GetString(reader.GetOrdinal("Designation"))
-                            
-                            
-                        };
-
-                        cohorts.Add(cohort);
-                    }
-
-                    reader.Close();
-
-                    return View(cohorts);
-                }
-            }
+            var cohorts = CohortRepository.GetCohorts();
+            return View(cohorts);
         }
 
         // GET: Students/Details/5
         public ActionResult Details(int id)
         {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText =
-                        $@"
-                        SELECT
-                        c.Id,
-                        c.Designation
-                        FROM Cohort c
-                        Where c.id = @id;";
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    Cohort cohort = null;
-
-                    if (reader.Read())
-                    {
-                        cohort = new Cohort
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Designation = reader.GetString(reader.GetOrdinal("Designation"))
-
-                        };
-
-                    }
-                    reader.Close();
-                    return View(cohort);
-
-                }
-            }
+            var cohort = CohortRepository.GetCohort(id);
+            return View(cohort);
             
         }
 
